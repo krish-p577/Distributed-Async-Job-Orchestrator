@@ -1,3 +1,20 @@
 spring:
   application:
     name: orchestrator
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orchestrator
+    username: orchestrator
+    password: orchestrator
+  sql:
+    init:
+      # Schema is applied once via docker-entrypoint-initdb.d (see docker-compose.yml),
+      # not on every app startup - CREATE TYPE/TABLE in schema.sql isn't idempotent,
+      # so re-running it on restart would fail. A real migration tool (Flyway/Liquibase)
+      # is the natural upgrade once the schema needs to evolve.
+      mode: never
+  session:
+    jdbc:
+      initialize-schema: always
+
+server:
+  port: 8080
