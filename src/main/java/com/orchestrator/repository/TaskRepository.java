@@ -49,13 +49,8 @@ public class TaskRepository {
                 .stream().findFirst();
     }
 
-    /**
-     * Atomically claims the oldest QUEUED task using SELECT ... FOR UPDATE
-     * SKIP LOCKED. Any number of worker threads/processes can call this
-     * concurrently: Postgres guarantees each row is handed to exactly one
-     * caller, and callers that would otherwise block on a locked row skip
-     * it and move on instead of queueing up behind each other.
-     */
+    // claims the oldest Queued task, marks it as running, makes sure no task is 
+    // assigned twice
     public Optional<Task> claimNextTask(String workerId) {
         String sql = """
                 UPDATE tasks
@@ -93,14 +88,7 @@ public class TaskRepository {
                 """, taskId);
     }
 
-    /**
-     * Either re-queues the task for another attempt (-> QUEUED, worker_id
-     * cleared) or marks it permanently FAILED if the retry budget is
-     * exhausted. idempotency_key is deliberately left untouched - it must
-     * stay stable across retries so a worker can tell "I already produced
-     * this side effect" if the previous attempt actually succeeded but its
-     * heartbeat was merely lost to a network blip.
-     */
+    // requeues the task if it has retires left, otherwise marks it as failed
     public void failOrRetry(UUID taskId, String errorMessage) {
         jdbc.update("""
                 UPDATE tasks
@@ -147,12 +135,9 @@ public class TaskRepository {
                 """, taskId);
     }
 
-    /**
-     * A live snapshot of what every worker is currently doing - derived
-     * directly from the tasks table (no separate registry to keep in
-     * sync). This is what makes multiple workers' activity visible from
-     * outside their own console output.
-     */
+    // returns a list of all tasks that are currently running, along with the worker ID, task key,
+    //  task type, dag run ID, and last heartbeat timestamp. This allows monitoring of active workers 
+    // and their assigned tasks.
     public List<WorkerStatus> findActiveWorkerStatus() {
         return jdbc.query("""
                 SELECT worker_id, task_key, task_type, dag_run_id, last_heartbeat_at
