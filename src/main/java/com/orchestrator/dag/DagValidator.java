@@ -9,17 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Validates a parsed DagDefinition and produces a topological ordering of
- * its tasks using Kahn's algorithm. Checks run in this order because each
- * one makes the next meaningless if skipped:
- *
- *   1. No duplicate task keys - otherwise dependency edges are ambiguous.
- *   2. Every depends_on reference resolves to a task that actually exists
- *      in this DAG - otherwise we'd build a graph with dangling edges.
- *   3. The resulting graph is acyclic - otherwise no valid execution
- *      order exists at all.
- */
+
+
+// creates topological order of tasks using Kahn's algorithm
+// creates acyclic graph to insure no cycles
 public final class DagValidator {
 
     private DagValidator() {
