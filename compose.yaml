@@ -8,9 +8,6 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      # Scripts here run ONLY the first time the volume is created (empty
-      # data dir). Restarting with data already present will NOT re-run
-      # schema.sql - that's what makes this safe to leave in place.
       - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - orchestrator_pgdata:/var/lib/postgresql/data
 

@@ -1,10 +1,4 @@
--- Run once against the running Postgres to get a testable DAG in place
--- before the YAML parser exists:
---   docker exec -i orchestrator-postgres-1 psql -U orchestrator -d orchestrator < seed.sql
---
--- Models a 3-step chain: fetch_data -> transform -> upload_s3
--- Only fetch_data starts QUEUED (eligible to claim); the rest are PENDING
--- until their upstream dependency completes.
+--basic test data for a DAG run
 
 INSERT INTO dags (id, name, definition) VALUES
     ('11111111-1111-1111-1111-111111111111', 'nightly-pipeline', '{}');
