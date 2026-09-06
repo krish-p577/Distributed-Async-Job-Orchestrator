@@ -1,0 +1,11 @@
+name: bad-cycle
+tasks:
+  - key: a
+    type: FETCH
+    depends_on: [c]
+  - key: b
+    type: SQL_TRANSFORM
+    depends_on: [a]
+  - key: c
+    type: S3_UPLOAD
+    depends_on: [b]

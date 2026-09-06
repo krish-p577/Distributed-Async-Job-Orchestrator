@@ -1,0 +1,24 @@
+name: nightly-pipeline
+tasks:
+  - key: fetch_data
+    type: FETCH
+    config:
+      source: s3://raw-bucket/daily
+  - key: transform
+    type: SQL_TRANSFORM
+    depends_on: [fetch_data]
+    config:
+      query: transform.sql
+  - key: summarize
+    type: LLM_SUMMARY
+    depends_on: [transform]
+  - key: upload_s3
+    type: S3_UPLOAD
+    depends_on: [summarize]
+    config:
+      bucket: processed-artifacts
+  - key: notify_slack
+    type: SLACK_NOTIFY
+    depends_on: [upload_s3]
+    config:
+      channel: "#data-pipeline"
