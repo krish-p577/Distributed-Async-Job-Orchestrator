@@ -2,6 +2,7 @@ package com.orchestrator.repository;
 
 import com.orchestrator.model.Task;
 import com.orchestrator.model.TaskStatus;
+import com.orchestrator.model.WorkerStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -103,9 +104,7 @@ public class TaskRepository {
     public void failOrRetry(UUID taskId, String errorMessage) {
         jdbc.update("""
                 UPDATE tasks
-                SET status = CAST(
-                    CASE WHEN retry_count < max_retries THEN 'QUEUED' ELSE 'FAILED' END AS task_status
-                ),
+                SET status = CASE WHEN retry_count < max_retries THEN 'QUEUED' ELSE 'FAILED' END,
                     retry_count = retry_count + 1,
                     worker_id = NULL,
                     claimed_at = NULL,
@@ -145,5 +144,26 @@ public class TaskRepository {
                 UPDATE tasks SET status = 'QUEUED', updated_at = now()
                 WHERE id = ? AND status = 'PENDING'
                 """, taskId);
+    }
+
+    /**
+     * A live snapshot of what every worker is currently doing - derived
+     * directly from the tasks table (no separate registry to keep in
+     * sync). This is what makes multiple workers' activity visible from
+     * outside their own console output.
+     */
+    public List<WorkerStatus> findActiveWorkerStatus() {
+        return jdbc.query("""
+                SELECT worker_id, task_key, task_type, dag_run_id, last_heartbeat_at
+                FROM tasks
+                WHERE status = 'RUNNING'
+                ORDER BY worker_id
+                """, (rs, rowNum) -> new WorkerStatus(
+                rs.getString("worker_id"),
+                rs.getString("task_key"),
+                rs.getString("task_type"),
+                UUID.fromString(rs.getString("dag_run_id")),
+                toInstant(rs.getTimestamp("last_heartbeat_at"))
+        ));
     }
 }
