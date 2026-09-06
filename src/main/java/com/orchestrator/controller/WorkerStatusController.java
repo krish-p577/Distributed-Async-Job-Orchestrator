@@ -8,13 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * A live cross-worker view, read straight from Postgres rather than any
- * separate registry the workers push into - so it can never drift out of
- * sync with what claimNextTask/heartbeat/complete actually did. This is
- * also the natural data source for the future dashboard's "current
- * state" panel.
- */
 @RestController
 @RequestMapping("/api/workers")
 public class WorkerStatusController {
@@ -25,6 +18,8 @@ public class WorkerStatusController {
         this.taskRepository = taskRepository;
     }
 
+    // get a view of all the current workers and their status
+    // from the posgres database
     @GetMapping("/status")
     public List<WorkerStatus> status() {
         return taskRepository.findActiveWorkerStatus();

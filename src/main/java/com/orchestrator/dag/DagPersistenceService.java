@@ -10,12 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Turns a DagDefinition into rows in dags / dag_runs / tasks /
- * task_dependencies. Tasks are inserted in topological order so that by
- * the time any given task's row is created, every task it depends on
- * already has a real database id for task_dependencies to reference.
- */
+
+
+// turn a Dagdefnition into rows in dags, gad_runs, tasks, and task_dependencies
+// in database, tasks are inserted in topological order, so each task added, 
+// allready has all its dependencies to reference
 @Service
 public class DagPersistenceService {
 
@@ -28,9 +27,6 @@ public class DagPersistenceService {
 
     @Transactional
     public UUID registerAndStart(DagDefinition definition) {
-        // Validation happens here rather than in the controller, so every
-        // caller of this service - REST, a future CLI, tests - gets the
-        // same guarantee for free instead of having to remember to call it.
         List<String> order = DagValidator.topologicalOrder(definition);
 
         Map<String, TaskDefinition> byKey = new HashMap<>();

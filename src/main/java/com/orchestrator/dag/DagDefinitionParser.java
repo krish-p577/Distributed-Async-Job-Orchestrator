@@ -6,14 +6,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/**
- * Parses a DAG definition from YAML. This step only builds the Java
- * object graph - it does NOT check that the graph is acyclic or that
- * dependency references resolve to real tasks. That's DagValidator's
- * job; callers should always run the parsed result through
- * DagValidator.topologicalOrder(...) before persisting or scheduling
- * anything from it.
- */
+
+
+// parse DAG definition from YAML
 @Component
 public class DagDefinitionParser {
 

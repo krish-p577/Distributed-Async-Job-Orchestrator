@@ -27,12 +27,8 @@ public class DagController {
         this.persistenceService = persistenceService;
     }
 
-    /**
-     * Accepts a raw YAML DAG definition, validates it (unique keys, known
-     * dependency references, no cycles), persists it, and starts a run.
-     * Root tasks (no dependencies) are inserted already QUEUED, so a
-     * worker can start claiming work immediately after this returns.
-     */
+    // takes in YAML file and validiates it and starts a run, root tasks 
+    // are set to queued so they can be claimed immidiately
     @PostMapping(consumes = "text/yaml")
     public ResponseEntity<Map<String, UUID>> createDagRun(@RequestBody String yaml) {
         DagDefinition definition = parser.parse(yaml);
