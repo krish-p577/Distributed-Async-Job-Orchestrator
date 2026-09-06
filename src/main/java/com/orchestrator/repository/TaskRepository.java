@@ -104,7 +104,8 @@ public class TaskRepository {
     public void failOrRetry(UUID taskId, String errorMessage) {
         jdbc.update("""
                 UPDATE tasks
-                SET status = CASE WHEN retry_count < max_retries THEN 'QUEUED' ELSE 'FAILED' END,
+                SET status = CAST(
+                CASE WHEN retry_count < max_retries THEN 'QUEUED' ELSE 'FAILED' END AS task_status),
                     retry_count = retry_count + 1,
                     worker_id = NULL,
                     claimed_at = NULL,
